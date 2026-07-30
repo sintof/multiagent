@@ -1,0 +1,16 @@
+Q3 2026 Internal Notes — Northwind Analytics Co.
+
+Customer churn rose to 4.2% in Q3, up from 2.9% in Q2. The main driver was the
+Starter-tier segment, where support response time averaged 36 hours, well above
+the 12-hour SLA target. Exit interviews cited slow support and missing export
+features as the top two reasons for cancellation.
+
+The Enterprise tier grew net revenue by 18% quarter over quarter, driven mostly
+by three renewals with expanded seat counts. No enterprise account churned in Q3.
+
+Engineering shipped the CSV export feature in late September, after most of the
+Q3 churn had already happened, so its impact on retention won't be visible until
+the Q4 numbers.
+
+Headcount: Support team grew from 4 to 6 people in Q3 specifically to address
+the response-time gap. Full effect expected in Q4.

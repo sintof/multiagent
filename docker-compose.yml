@@ -1,0 +1,41 @@
+networks:
+  web:
+    external: true
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: analyst-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant-data:/qdrant/storage
+    networks:
+      - web
+    # no published ports — backend reaches it by container name on the `web` network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+  backend:
+    build: ./backend
+    container_name: analyst-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      - qdrant
+    volumes:
+      - ./data:/app/data
+    networks:
+      - web
+    # no published ports — Caddy reverse-proxies analyst-api.froton.uz -> analyst-backend:8000
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+
+volumes:
+  qdrant-data:

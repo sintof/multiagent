@@ -1,0 +1,14 @@
+langgraph
+langchain
+langchain-openai
+langchain-qdrant
+langchain-community
+langchain-text-splitters
+qdrant-client
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+tavily-python
+langfuse
+ragas==0.2.15  # pinned — newer ragas + current langchain-community need the vertexai import shim in eval/_ragas_compat.py either way
