@@ -1,6 +1,6 @@
 """
 Seeds data/company.db for the text-to-SQL agent (F5). Synthetic data for a fictional
-company "Northwind Analytics" — matches the narrative in sample_company_notes.txt
+company "Fernbridge Software" — matches the narrative in sample_company_notes.txt
 (Q3 churn spike, starter-tier driven, slow support response) so retriever + SQL agent
 tell a consistent story when tested together later.
 """
