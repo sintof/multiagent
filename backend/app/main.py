@@ -62,6 +62,12 @@ def ask_stream(req: AskRequest):
                     if key in node_output:
                         payload[key] = node_output[key]
                 q.put(payload)
+        except Exception as exc:
+            # Without this, an unhandled node exception (timeout, upstream error, etc.)
+            # just ends the stream via `finally` below with no explanation — the frontend
+            # sees the connection close, clears its spinner, and shows nothing. Surface it
+            # as an explicit error event so the user knows the request failed and why.
+            q.put({"node": "error", "error": str(exc)})
         finally:
             q.put(DONE)
 

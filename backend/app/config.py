@@ -19,5 +19,14 @@ class Settings:
     langfuse_secret_key: str | None = os.getenv("LANGFUSE_SECRET_KEY")
     langfuse_host: str = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
 
+    # Without an explicit timeout, langchain_openai falls through to the openai SDK's
+    # default (600s per attempt, 2 retries -> ~30 min of silent hang on a slow/cold
+    # proxy) before anything surfaces to the user. Every LLM/embedding call and the
+    # Tavily web search go through these so a stalled upstream fails fast instead of
+    # leaving the UI stuck on "Thinking" indefinitely.
+    llm_timeout_seconds: float = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+    llm_max_retries: int = int(os.getenv("LLM_MAX_RETRIES", "1"))
+    web_search_timeout_seconds: float = float(os.getenv("WEB_SEARCH_TIMEOUT_SECONDS", "20"))
+
 
 settings = Settings()

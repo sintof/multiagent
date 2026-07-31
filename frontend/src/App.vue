@@ -35,6 +35,10 @@ function describe(step) {
     return { kind: 'generate', label: 'Generate', detail: 'synthesizing answer from evidence' }
   }
   const name = step.split('(')[0]
+  if (step.includes('(error')) {
+    const detail = step.match(/\(error:?\s*(.*)\)$/)?.[1] ?? 'failed'
+    return { kind: 'agent-error', label: name, detail }
+  }
   return { kind: 'agent', label: name, detail: 'agent executed' }
 }
 
@@ -73,6 +77,10 @@ async function ask() {
         const dataLine = evt.split('\n').find((l) => l.startsWith('data: '))
         if (!dataLine) continue
         const payload = JSON.parse(dataLine.slice('data: '.length))
+        if (payload.node === 'error') {
+          error.value = payload.error || 'Something went wrong while answering.'
+          continue
+        }
         if (payload.steps) steps.value = payload.steps
         if (payload.answer) answer.value = payload.answer
         if (payload.sql_result) sqlResult.value = payload.sql_result
@@ -345,6 +353,9 @@ async function ask() {
 
 .timeline-item.agent .node-dot { background: var(--primary); }
 .timeline-item.agent .node-label { color: var(--primary); }
+
+.timeline-item.agent-error .node-dot { background: var(--danger); }
+.timeline-item.agent-error .node-label { color: var(--danger); }
 
 .timeline-item.generate .node-dot { background: var(--accent); }
 .timeline-item.generate .node-label { color: var(--accent); }
