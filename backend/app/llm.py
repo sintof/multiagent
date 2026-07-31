@@ -24,6 +24,8 @@ def get_llm_lite(temperature: float = 0.2) -> ChatOpenAI:
         api_key=settings.gemini_api_key,
         model=MODEL_LITE,
         temperature=temperature,
+        timeout=settings.llm_timeout_seconds,
+        max_retries=settings.llm_max_retries,
     )
 
 
@@ -33,6 +35,8 @@ def get_llm_flash(temperature: float = 0.0) -> ChatOpenAI:
         api_key=settings.gemini_api_key,
         model=MODEL_FLASH,
         temperature=temperature,
+        timeout=settings.llm_timeout_seconds,
+        max_retries=settings.llm_max_retries,
     )
 
 
@@ -41,4 +45,6 @@ def get_embeddings() -> OpenAIEmbeddings:
         base_url=settings.proxy_base_url,
         api_key=settings.gemini_api_key,
         model=MODEL_EMBED,
+        timeout=settings.llm_timeout_seconds,
+        max_retries=settings.llm_max_retries,
     )
