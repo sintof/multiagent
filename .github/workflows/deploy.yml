@@ -1,0 +1,64 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+env:
+  VPS_HOST: 13.140.181.210
+  VPS_USER: komron
+  API_DIR: /home/komron/apps/analyst-api
+  WEB_DIST_DIR: /home/komron/apps/analyst-web/dist
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up deploy key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/analyst_ci_deploy
+          chmod 600 ~/.ssh/analyst_ci_deploy
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Sync frontend (static, Caddy serves it directly)
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/analyst_ci_deploy -o StrictHostKeyChecking=no" \
+            frontend/dist/ "$VPS_USER@$VPS_HOST:$WEB_DIST_DIR/"
+
+      # /data is a live bind-mount (./data:/app/data in docker-compose.yml) —
+      # the running backend writes into it, so it must never be touched by a
+      # deploy even though the repo also tracks seed scripts under the same
+      # path (data/seed_db.py). qdrant-data is a *named* Docker volume, not a
+      # host path, so it's untouched either way. .env holds the real
+      # Postgres/API credentials and would get deleted by --delete since
+      # it's untracked.
+      - name: Sync backend + compose file
+        run: |
+          rsync -az --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude '.env' \
+            --exclude '/data' \
+            --exclude 'frontend' \
+            -e "ssh -i ~/.ssh/analyst_ci_deploy -o StrictHostKeyChecking=no" \
+            ./ "$VPS_USER@$VPS_HOST:$API_DIR/"
+
+      - name: Rebuild and restart the backend
+        run: |
+          ssh -i ~/.ssh/analyst_ci_deploy -o StrictHostKeyChecking=no \
+            "$VPS_USER@$VPS_HOST" \
+            "cd $API_DIR && docker compose up -d --build"
